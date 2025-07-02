@@ -1,0 +1,5 @@
+TypeRacer is a multiplayer online browser-based typing game. In TypeRacer, players complete typing tests of various texts as fast as possible, competing against themselves or with other users online. It was launched in March 2008.
+
+TypeRacer was created by programmer Alex Epshteyn, using the OpenSocial application programming interface (API) and the Google Web Toolkit.[1] Epshteyn is a former intern at Google and graduate of the University of Massachusetts Amherst with a Master's degree in computer science.[2] He was inspired to create a competitive multiplayer typing game because the Windows shareware program he used to learn touch typing lacked a multiplayer mode. Although older games, such as The Typing of the Dead, had launched before Epshteyn's conception of TypeRacer, the existence of such were unbeknownst to him due to his self-described inexperience in the gaming community. When a former engineer from the hallmark typing game Mavis Beacon Teaches Typing contacted Epshteyn regarding TypeRacer, he expressed approval for the project on behalf of the Beacon team.[3]
+
+TypeRacer was listed among PC Magazine's "Top 100 Undiscovered Web Sites of 2008".[4]
