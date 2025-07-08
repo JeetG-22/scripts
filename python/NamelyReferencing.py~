@@ -14,13 +14,20 @@ namely_df["Nick name"] = namely_df["Nick name"].fillna("").apply(lambda name: na
 
 namely_active = namely_df[namely_df["Status"] == "Active"].copy() #filter based on active users
 
-#getting all users not in namely
-user_dict = {"Unverified Name": [], "Verizon Phone Number": []}
+#getting all unverified users
+user_dict = {"Unverified Name (Verizon)": [], "Verizon Phone Number": [], "Reason For Update": []}
 for index, row in verizon_df.iterrows():
     user = row["User name"]
     if user.lower() not in namely_active["Full name"].values and user.lower() not in namely_active["Nick name"].values:
-        user_dict["Unverified Name"].append(user)
-        user_dict["Verizon Phone Number"].append(row["Wireless number"])
+        user_dict["Unverified Name (Verizon)"].append(user)
+        user_dict["Verizon Phone Number"].append(row["Wireless number"])  
+        #finding unrecognized users and bucketing into correct description
+        if "user" in user.lower():
+            user_dict["Reason For Update"].append("unassigned")
+        elif user.lower() not in namely_df["Full name"].values and user.lower() not in namely_df["Nick name"].values:
+            user_dict["Reason For Update"].append("nonexistent in namely")
+        else:
+            user_dict["Reason For Update"].append("not active")
 
 #convert dict to df
 unverified_df = pd.DataFrame(user_dict)
@@ -34,31 +41,34 @@ num1 = len(intune_df)
 intune_df.dropna(inplace=True)
 num2 = len(intune_df)
 intune_df["Phone number"] = intune_df["Phone number"].astype(str)
-print(f"# Of Rows Dropped In Intune DF: {num1-num2}")
+#print(f"# Of Rows Dropped In Intune DF: {num1-num2}")
 
 #convert data to match intune phone number format
-unverified_df["Formatted Verizon Phone Number"] = unverified_df["Verizon Phone Number"].apply(lambda num: "1" + num.replace("-",""))
-unverified_df["Intune Name"] = None
+unverified_df["Unformatted Verizon Phone Number"] = unverified_df["Verizon Phone Number"].apply(lambda num: "1" + num.replace("-",""))
+unverified_df["Verified Name (Intune)"] = None
 unverified_df["Intune IMEI"] = None
 
 #gathering Intune IMEI and name info 
 for index, row in unverified_df.iterrows():
-    number = row["Formatted Verizon Phone Number"]
+    number = row["Unformatted Verizon Phone Number"]
     if number in intune_df["Phone number"].values:
        values = intune_df.loc[intune_df["Phone number"] == number, ["Primary user display name", "IMEI"]].values
-       unverified_df.at[index, "Intune Name"] = values[0][0]
+       unverified_df.at[index, "Verified Name (Intune)"] = values[0][0]
        unverified_df.at[index, "Intune IMEI"] = values[0][1]
+
+#format final results
+desired_order = ["Unverified Name (Verizon)", "Verified Name (Intune)", "Verizon Phone Number", "Unformatted Verizon Phone Number", "Intune IMEI", "Reason For Update"]
+unverified_df = unverified_df.reindex(columns=desired_order)
 
 #write final results to excel
 unverified_df.to_excel(r"C:\Users\jgupta\OneDrive - Collegium Pharma\Verizon Updates.xlsx", index=False)
-print("Written To Excel Successfully!")
-
+print("Written To Excel Successfully!\n\n")
 user_dict = {"unassigned": [], "nonexistent in namely": [], "not active": []} 
-null_rows = unverified_df[unverified_df["Intune Name"].isnull()]
+null_rows = unverified_df[unverified_df["Verified Name (Intune)"].isnull()]
 
 #finding unrecognized users and bucketing into correct description
 for index,row in null_rows.iterrows():
-    user = row["Unverified Name"]
+    user = row["Unverified Name (Verizon)"]
     if user.lower() not in namely_active["Full name"].values and user.lower() not in namely_active["Nick name"].values:
         if "user" in user.lower():
             user_dict["unassigned"].append((user, row["Verizon Phone Number"]))
@@ -85,7 +95,7 @@ user_dict["nonexistent in namely"] = list(set(user_dict["nonexistent in namely"]
 user_dict["potentially misspelled"] = misspelled_list
 
 #final output    
-print("Unverified Users In Namely\n\n")
+print("Unverified Users In Namely\n")
 for desc in user_dict:
     print(f"{desc}:")
     user_dict[desc].sort()
