@@ -29,6 +29,7 @@ for index, row in verizon_df.iterrows():
         else:
             user_dict["Reason For Update"].append("not active")
 
+print(f'# Of Unverified Names: {len(user_dict["Unverified Name (Verizon)"])}')
 #convert dict to df
 unverified_df = pd.DataFrame(user_dict)
 
